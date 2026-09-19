@@ -1,6 +1,6 @@
 {
     "name": "ez-php/metrics-statsd",
-    "version": "2.4.7",
+    "version": "2.4.8",
     "description": "StatsD/UDP exporter for ez-php/metrics — a dependency-free fire-and-forget StatsD sender.",
     "type": "library",
     "license": "MIT",
