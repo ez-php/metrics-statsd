@@ -119,7 +119,7 @@ final class StatsdSender
             return false;
         }
 
-        return @fwrite($socket, $packet) === strlen($packet);
+        return self::quietly(static fn (): int|false => fwrite($socket, $packet)) === strlen($packet);
     }
 
     /**
@@ -128,12 +128,12 @@ final class StatsdSender
     private function connect()
     {
         if ($this->socket === null) {
-            $socket = @stream_socket_client(
+            $socket = self::quietly(fn () => stream_socket_client(
                 "udp://{$this->host}:{$this->port}",
                 $errorCode,
                 $errorMessage,
                 $this->timeout,
-            );
+            ));
 
             if ($socket === false) {
                 return null;
@@ -185,5 +185,26 @@ final class StatsdSender
     private static function formatFloat(float $value): string
     {
         return rtrim(rtrim(sprintf('%.6F', $value), '0'), '.');
+    }
+
+    /**
+     * Run a call whose PHP warning is expected and handled through its return value,
+     * without the `@` operator.
+     *
+     * @template T
+     *
+     * @param callable(): T $fn
+     *
+     * @return T
+     */
+    private static function quietly(callable $fn)
+    {
+        set_error_handler(static fn (): bool => true, E_WARNING);
+
+        try {
+            return $fn();
+        } finally {
+            restore_error_handler();
+        }
     }
 }
