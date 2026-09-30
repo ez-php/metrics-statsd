@@ -35,7 +35,18 @@ $statsd->count('http.requests', 1, ['status' => '200']); // …|c|#status:200  (
 
 ### Alongside `ez-php/metrics`
 
-`ez-php/metrics` needs no changes: call `StatsdSender` next to the `Metrics::counter()` / `Metrics::gauge()` calls you already make, or from a listener/middleware of your own.
+Register the bridge once and every value recorded through the registry is also sent to StatsD:
+
+```php
+use EzPhp\MetricsStatsd\StatsdMetricsListener;
+use EzPhp\MetricsStatsd\StatsdSender;
+
+$registry->listen(new StatsdMetricsListener(new StatsdSender('127.0.0.1', 8125, 'app.')));
+```
+
+Counters become `count` (rounded to an integer), gauges `gauge` (the resulting value), histogram
+observations `timing` in milliseconds (`histogramToMilliseconds`, default 1000 for seconds-based
+histograms). Labels become DogStatsD tags.
 
 ---
 

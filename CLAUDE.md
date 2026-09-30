@@ -28,10 +28,11 @@ docker compose exec app composer full
 Executes in order:
 1. `sync_guidelines.php --check` — fails if any `CLAUDE.md` has drifted from this file
 2. `check_test_classes.php` — fails on a duplicate test class name (all packages share the `Tests\` namespace, so a collision is a fatal error in the aggregated run, not a test failure)
-3. `phpstan analyse` — static analysis, level 9, config: `phpstan.neon`
-4. `php-cs-fixer fix` — auto-fixes style (`@PSR12` + `@PHP83Migration` + strict rules)
+3. `check_module_deps.php` — fails when a package's code imports an ez-php package its `composer.json` does not declare (module `src`: `require`/`suggest`; tests: `require`/`require-dev` and their dependencies), or requires one it never uses
+4. `phpstan analyse` — static analysis, level 9, config: `phpstan.neon`
+5. `php-cs-fixer fix` — auto-fixes style (`@PSR12` + `@PHP83Migration` + strict rules)
    *(Note: `@PHP85Migration` does not exist yet in php-cs-fixer; `@PHP83Migration` is the highest available and is used intentionally even though the project targets PHP 8.5)*
-5. `phpunit` — all tests with coverage
+6. `phpunit` — all tests with coverage
 
 Individual commands when needed:
 ```
@@ -40,6 +41,7 @@ composer cs                  # CS Fixer only
 composer test                # PHPUnit only
 composer guidelines:check    # CLAUDE.md drift only
 composer test-classes:check  # duplicate test class names only
+composer module-deps:check   # undeclared / unused ez-php package dependencies only
 ```
 
 **PHPStan:** never suppress with `@phpstan-ignore-line` — always fix the root cause.
@@ -198,20 +200,22 @@ vendor/bin/docker-init
 
 This copies `Dockerfile`, `docker-compose.yml`, `.env.example`, `start.sh`, and `docker/` into the module, replacing `{{MODULE_NAME}}` placeholders. Existing files are never overwritten.
 
-Pass `--services` to merge MySQL/Redis/Meilisearch service definitions directly into `docker-compose.yml` and uncomment the matching sections in `.env.example`, instead of adapting them by hand afterward:
+Pass `--services` to merge MySQL/Redis/Meilisearch/Memcached/Mailpit service definitions directly into `docker-compose.yml` and uncomment the matching sections in `.env.example`, instead of adapting them by hand afterward:
 
 ```
 vendor/bin/docker-init --services=mysql
 vendor/bin/docker-init --services=redis
 vendor/bin/docker-init --services=meilisearch
 vendor/bin/docker-init --services=mysql,redis
+vendor/bin/docker-init --services=memcached,mailpit
 ```
 
-Pass `--extensions` to merge PHP extension install blocks (apt packages plus `docker-php-ext-install`/`pecl` lines) directly into `docker/app/Dockerfile`, instead of hand-editing it afterward — supported extensions: `bcmath`, `gmp`, `gd`, `imagick`:
+Pass `--extensions` to merge PHP extension install blocks (apt packages plus `docker-php-ext-install`/`pecl` lines) directly into `docker/app/Dockerfile`, instead of hand-editing it afterward — supported extensions: `bcmath`, `gmp`, `gd`, `imagick`, `memcached`, `apcu` (with `apc.enable_cli=1`):
 
 ```
 vendor/bin/docker-init --extensions=gmp,bcmath
 vendor/bin/docker-init --extensions=gd,imagick
+vendor/bin/docker-init --extensions=memcached,apcu
 ```
 
 When run from a module directory inside this monorepo, any requested extension not already present is also merged into the shared root `docker/app/Dockerfile` — the container `composer full` at the root actually runs against, distinct from the module's own standalone image.
@@ -267,10 +271,12 @@ When adding a new module, add `"$ROOT/modules/<name>"` to the `PACKAGES` array i
 modules/metrics-statsd/
 ├── src/
 │   ├── StatsdSender.php     — fire-and-forget StatsD client over UDP (count, gauge, timing, close)
+│   ├── StatsdMetricsListener.php — ez-php/metrics listener: counter → count, gauge → gauge, histogram → timing (×1000)
 │   └── StatsdException.php  — thrown for invalid host, port, prefix, metric name or tag
 └── tests/
     ├── TestCase.php         — base test case
-    └── StatsdSenderTest.php — sends real datagrams to a local UDP socket on an ephemeral port
+    ├── StatsdSenderTest.php — sends real datagrams to a local UDP socket on an ephemeral port
+    └── StatsdMetricsListenerTest.php — MetricsRegistry → listener → datagram, same local UDP socket
 ```
 
 ---
@@ -287,7 +293,7 @@ modules/metrics-statsd/
 
 - **Pure UDP via `stream_socket_client`, no client library** — same reasoning as the HTTP senders in `ez-php/log-transport`: the protocol is one line of text, a dependency would outweigh it.
 - **Never throws on transport failure** — UDP is fire-and-forget and instrumentation must not break the request it observes; `send` returns `false` instead. Invalid *input* does throw, since that is a bug in the caller, not an environment problem.
-- **Standalone consumer, no change to `ez-php/metrics`** — `MetricsRegistry` only exposes `render()` (Prometheus text) and holds no push hook, so this module is used next to `Metrics::counter()`/`gauge()` calls rather than wired into the registry. The only dependency is PHP itself; `ez-php/metrics` is a `suggest`.
+- **Registry bridge via `ez-php/metrics`' listener seam** — `MetricsRegistry::listen(new StatsdMetricsListener($sender))` sends every recorded value as it happens; `StatsdSender` itself is unchanged and still usable on its own. Counters are rounded to integers (StatsD counters are integral), histogram observations are scaled to milliseconds (`$histogramToMilliseconds`, default 1000 for seconds), and an invalid name/tag is dropped rather than thrown. The runtime dependency is PHP only; `ez-php/metrics` is a `suggest` (+ `require-dev` for the tests).
 - **No service provider** — the sender is constructed by the caller with explicit host/port/prefix; there is no config file or container binding, so it is not listed in the template README's "Optional Modules" table.
 - **DogStatsD tags are opt-in** — the `|#k:v` extension is only emitted when tags are passed; plain StatsD servers may reject it.
 - **`gauge()` with a negative value** is interpreted as a *delta* by classic StatsD servers (`-5|g`); this sender does not work around that.
@@ -313,5 +319,4 @@ modules/metrics-statsd/
 |---|---|
 | Metric types, registry, Prometheus rendering, `/metrics` route | `ez-php/metrics` |
 | Log shipping (ELK, Datadog, Loki) | `ez-php/log-transport` |
-| Bridging `MetricsRegistry` into StatsD automatically | a future hook in `ez-php/metrics` (not a change to this module's sender) |
 | TCP/UDS transports, batching, sampling | out of scope until needed |

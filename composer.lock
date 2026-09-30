@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fe171843749efa3506da5aafa861f18b",
+    "content-hash": "d89905f44023d266e86f47a0d88b7ea7",
     "packages": [],
     "packages-dev": [
         {
@@ -407,6 +407,65 @@
             "time": "2023-08-08T05:53:35+00:00"
         },
         {
+            "name": "ez-php/contracts",
+            "version": "2.5.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ez-php/contracts.git",
+                "reference": "7cda267244b76912547ce94e6de1add5fb65153d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ez-php/contracts/zipball/7cda267244b76912547ce94e6de1add5fb65153d",
+                "reference": "7cda267244b76912547ce94e6de1add5fb65153d",
+                "shasum": ""
+            },
+            "require": {
+                "ext-pdo": "*",
+                "ez-php/http": "^2.0",
+                "php": "^8.5"
+            },
+            "require-dev": {
+                "ez-php/docker": "^2.0",
+                "ez-php/testing-application": "^2.0",
+                "friendsofphp/php-cs-fixer": "^3.94",
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "phpunit/phpunit": "^13.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "EzPhp\\Contracts\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andreas Uretschnig",
+                    "email": "andreas.uretschnig@gmail.com"
+                }
+            ],
+            "description": "Shared interfaces and abstract base classes for the ez-php framework — zero framework coupling for standalone modules",
+            "homepage": "https://github.com/ez-php/contracts",
+            "keywords": [
+                "contracts",
+                "dependency-injection",
+                "ez-php",
+                "interfaces",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/ez-php/contracts/issues",
+                "source": "https://github.com/ez-php/contracts"
+            },
+            "time": "2026-09-26T02:22:14+00:00"
+        },
+        {
             "name": "ez-php/docker",
             "version": "2.5.4",
             "source": {
@@ -441,6 +500,127 @@
                 "source": "https://github.com/ez-php/docker/tree/v2.5.4"
             },
             "time": "2026-09-26T02:22:21+00:00"
+        },
+        {
+            "name": "ez-php/http",
+            "version": "2.5.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ez-php/http.git",
+                "reference": "a9abca3165b4319b65ed67568770d4f1e2b56395"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ez-php/http/zipball/a9abca3165b4319b65ed67568770d4f1e2b56395",
+                "reference": "a9abca3165b4319b65ed67568770d4f1e2b56395",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.5"
+            },
+            "require-dev": {
+                "ez-php/docker": "^2.0",
+                "ez-php/testing-application": "^2.0",
+                "friendsofphp/php-cs-fixer": "^3.94",
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "phpunit/phpunit": "^13.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "EzPhp\\Http\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andreas Uretschnig",
+                    "email": "andreas.uretschnig@gmail.com"
+                }
+            ],
+            "description": "HTTP message objects for the ez-php framework — immutable Request, Response, RequestFactory, and ResponseEmitter. Zero dependencies.",
+            "homepage": "https://github.com/ez-php/http",
+            "keywords": [
+                "http",
+                "php",
+                "psr",
+                "request",
+                "response"
+            ],
+            "support": {
+                "issues": "https://github.com/ez-php/http/issues",
+                "source": "https://github.com/ez-php/http"
+            },
+            "time": "2026-09-26T02:22:26+00:00"
+        },
+        {
+            "name": "ez-php/metrics",
+            "version": "2.5.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ez-php/metrics.git",
+                "reference": "faf8630646579310c027efebe55da00acf6664d5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ez-php/metrics/zipball/faf8630646579310c027efebe55da00acf6664d5",
+                "reference": "faf8630646579310c027efebe55da00acf6664d5",
+                "shasum": ""
+            },
+            "require": {
+                "ez-php/contracts": "^2.0",
+                "ez-php/http": "^2.0",
+                "php": "^8.5"
+            },
+            "require-dev": {
+                "ez-php/docker": "^2.0",
+                "ez-php/health": "^2.0",
+                "friendsofphp/php-cs-fixer": "^3.94",
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "phpunit/phpunit": "^13.0"
+            },
+            "suggest": {
+                "ez-php/health": "Needed for HealthMetricsListener (probe status/latency as gauges)"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "EzPhp\\Metrics\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andreas Uretschnig",
+                    "email": "andreas.uretschnig@gmail.com"
+                }
+            ],
+            "description": "Prometheus metrics endpoint for ez-php — Counter, Gauge, Histogram with a /metrics route and static Metrics facade.",
+            "homepage": "https://github.com/ez-php/metrics",
+            "keywords": [
+                "Metrics",
+                "ez-php",
+                "framework",
+                "monitoring",
+                "observability",
+                "php",
+                "prometheus"
+            ],
+            "support": {
+                "issues": "https://github.com/ez-php/metrics/issues",
+                "source": "https://github.com/ez-php/metrics"
+            },
+            "time": "2026-09-26T02:22:16+00:00"
         },
         {
             "name": "fidry/cpu-core-counter",
