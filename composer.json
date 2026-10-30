@@ -1,6 +1,6 @@
 {
     "name": "ez-php/metrics-statsd",
-    "version": "2.6.5",
+    "version": "2.7.0",
     "description": "StatsD/UDP exporter for ez-php/metrics — a dependency-free fire-and-forget StatsD sender.",
     "type": "library",
     "license": "MIT",
@@ -32,8 +32,8 @@
         "ez-php/metrics": "Prometheus-side metrics registry; needed for StatsdMetricsListener (MetricsRegistry::listen())"
     },
     "require-dev": {
-        "ez-php/docker": "^2.6.0",
-        "ez-php/metrics": "^2.6.0",
+        "ez-php/docker": "^2.7.0",
+        "ez-php/metrics": "^2.7.0",
         "phpunit/phpunit": "^13.0",
         "phpstan/phpstan": "^2.1",
         "friendsofphp/php-cs-fixer": "^3.94",
